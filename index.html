@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Рыжик — Тамагочи</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #080B12;
+  --surface:  #0F1320;
+  --card:     #131826;
+  --card2:    #1A2035;
+  --border:   #242B40;
+  --border2:  #2E3855;
+  --orange:   #FFB347;
+  --orange2:  #FF8C00;
+  --rust:     #E05520;
+  --blue:     #4A7FD4;
+  --green:    #3ECF8E;
+  --red:      #E05252;
+  --yellow:   #F0C040;
+  --purple:   #8B60D4;
+  --muted:    #5A6480;
+  --subtle:   #8899BB;
+  --text:     #D8E2F8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stars background */
+.stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;}
+.star{position:absolute;background:white;border-radius:50%;animation:twinkle linear infinite;}
+@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.7}}
+
+/* Glow orb */
+body::before{
+  content:'';position:fixed;top:40%;left:50%;
+  transform:translate(-50%,-50%);
+  width:600px;height:400px;
+  background:radial-gradient(ellipse,rgba(74,127,212,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* ─── MAIN LAYOUT ─── */
+.app{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  gap:1.2rem;max-width:400px;width:100%;
+}
+
+/* Header */
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:1.4rem;
+  padding:.85rem 1.3rem;
+}
+.hname{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;
+  background:linear-gradient(135deg,var(--orange),var(--rust));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hstats{display:flex;gap:1rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+.hstat span{color:var(--orange);font-weight:600;}
+
+/* Screen — the main tamagotchi display */
+.screen{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:2rem;
+  padding:2rem 2rem 1.6rem;
+  display:flex;flex-direction:column;align-items:center;gap:1.2rem;
+  box-shadow:0 0 60px rgba(74,127,212,.07),inset 0 1px 0 rgba(255,255,255,.04);
+  position:relative;overflow:hidden;
+}
+
+/* Screen scanlines effect */
+.screen::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);
+  pointer-events:none;border-radius:2rem;
+}
+
+/* State badge */
+.state-badge{
+  position:absolute;top:1.1rem;right:1.4rem;
+  font-size:.7rem;font-weight:700;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.25rem .7rem;border-radius:2rem;
+  border:1px solid;transition:all .5s;
+}
+
+/* Cat display */
+.cat-display{
+  position:relative;
+  cursor:pointer;
+  transition:transform .3s;
+  user-select:none;
+}
+.cat-display:hover{transform:scale(1.05);}
+.cat-display:active{transform:scale(.95);}
+.cat-svg{display:block;transition:opacity .4s;}
+
+/* Zzz bubble for sleep */
+.zzz{
+  position:absolute;top:-10px;right:-15px;
+  font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;
+  color:var(--blue);opacity:0;
+  animation:zzzFloat 2s infinite ease-in-out;
+  pointer-events:none;
+}
+.zzz:nth-child(2){font-size:.9rem;animation-delay:.6s;top:-25px;right:-5px;}
+.zzz:nth-child(3){font-size:.65rem;animation-delay:1.2s;top:-38px;right:5px;}
+@keyframes zzzFloat{0%{opacity:0;transform:translateY(0) scale(.8)}30%{opacity:1}80%{opacity:.4}100%{opacity:0;transform:translateY(-14px) scale(1.1)}}
+.zzz-wrap{display:none;}
+body.state-sleeping .zzz-wrap{display:block;}
+
+/* Stat bars */
+.bars{width:100%;display:flex;flex-direction:column;gap:.6rem;}
+.bar-row{display:flex;align-items:center;gap:.7rem;}
+.bar-icon{font-size:.95rem;width:1.4rem;text-align:center;}
+.bar-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);width:4.5rem;}
+.bar-track{flex:1;height:8px;background:var(--surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.bar-val{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--subtle);width:2.5rem;text-align:right;}
+
+/* Message box */
+.msgbox{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:1rem;
+  padding:.75rem 1rem;
+  font-size:.85rem;
+  color:var(--subtle);
+  min-height:2.6rem;
+  font-style:italic;
+  transition:opacity .3s;
+  text-align:center;
+  line-height:1.4;
+}
+.msgbox.active{color:var(--text);font-style:normal;}
+
+/* Action buttons */
+.actions{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.7rem;
+}
+.btn{
+  background:var(--card2);
+  border:1.5px solid var(--border);
+  border-radius:1.1rem;
+  padding:.8rem .6rem;
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  cursor:pointer;transition:all .2s;
+  font-family:'Nunito',sans-serif;
+  position:relative;overflow:hidden;
+}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,.0);
+  transition:background .15s;
+}
+.btn:hover::after{background:rgba(255,255,255,.04);}
+.btn:active{transform:scale(.96);}
+.btn .ico{font-size:1.5rem;}
+.btn .lbl{font-size:.76rem;font-weight:700;letter-spacing:.03em;color:var(--muted);transition:color .2s;}
+.btn .cd{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:-.1rem;}
+
+/* Button themes */
+.btn-feed  { border-color:#2A3020; } .btn-feed:hover  {border-color:rgba(62,207,142,.4);} .btn-feed:hover  .lbl{color:var(--green);}
+.btn-play  { border-color:#20283A; } .btn-play:hover  {border-color:rgba(74,127,212,.4);} .btn-play:hover  .lbl{color:var(--blue);}
+.btn-sleep { border-color:#1E2235; } .btn-sleep:hover {border-color:rgba(139,96,212,.4);} .btn-sleep:hover .lbl{color:var(--purple);}
+.btn-pet   { border-color:#352018; } .btn-pet:hover   {border-color:rgba(255,179,71,.4);} .btn-pet:hover   .lbl{color:var(--orange);}
+
+.btn.disabled{opacity:.4;pointer-events:none;}
+.btn.sleeping-active{border-color:rgba(139,96,212,.5);background:rgba(139,96,212,.07);}
+.btn.sleeping-active .lbl{color:var(--purple);}
+
+/* Floaty emojis */
+.floaty{position:fixed;pointer-events:none;font-size:1.4rem;z-index:999;animation:floatUp 1.2s ease-out forwards;}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(.7)}100%{opacity:0;transform:translateY(-90px) scale(1.8) rotate(20deg)}}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:1.8rem;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--border2);border-radius:2rem;
+  padding:.55rem 1.4rem;font-size:.82rem;color:var(--orange);
+  opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;z-index:100;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Critical alert flash */
+@keyframes alertFlash{0%,100%{background:var(--card)}50%{background:rgba(224,82,82,.08)}}
+.screen.alert{animation:alertFlash 1s infinite;}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="hname">Рыжик 🐱</div>
+    <div class="hstats">
+      <div class="hstat">Возраст <span id="ageVal">0</span>д</div>
+      <div class="hstat">Уровень <span id="lvlVal">1</span></div>
+    </div>
+  </div>
+
+  <!-- Main screen -->
+  <div class="screen" id="screen">
+    <div class="state-badge" id="stateBadge">😊 Доволен</div>
+
+    <!-- Cat SVG (swapped by JS) -->
+    <div class="cat-display" id="catWrap">
+      <div class="zzz-wrap">
+        <div class="zzz">z</div>
+        <div class="zzz">z</div>
+        <div class="zzz">Z</div>
+      </div>
+      <div class="cat-svg" id="catSvg"><!-- injected --></div>
+    </div>
+
+    <!-- Stat bars -->
+    <div class="bars">
+      <div class="bar-row">
+        <span class="bar-icon">🍖</span>
+        <span class="bar-label">Голод</span>
+        <div class="bar-track"><div class="bar-fill" id="barHunger" style="width:80%;background:var(--green)"></div></div>
+        <span class="bar-val" id="valHunger">80</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-icon">💛</span>
+        <span class="bar-label">Счастье</span>
+        <div class="bar-track"><div class="bar-fill" id="barHappy" style="width:80%;background:var(--yellow)"></div></div>
+        <span class="bar-val" id="valHappy">80</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-icon">⚡</span>
+        <span class="bar-label">Энергия</span>
+        <div class="bar-track"><div class="bar-fill" id="barEnergy" style="width:90%;background:var(--blue)"></div></div>
+        <span class="bar-val" id="valEnergy">90</span>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="msgbox" id="msgbox">Нажми на котика или выбери действие…</div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="actions">
+    <button class="btn btn-feed" id="btnFeed">
+      <span class="ico">🐟</span>
+      <span class="lbl">ПОКОРМИТЬ</span>
+      <span class="cd" id="cdFeed"></span>
+    </button>
+    <button class="btn btn-play" id="btnPlay">
+      <span class="ico">🧶</span>
+      <span class="lbl">ПОИГРАТЬ</span>
+      <span class="cd" id="cdPlay"></span>
+    </button>
+    <button class="btn btn-sleep" id="btnSleep">
+      <span class="ico">🛋️</span>
+      <span class="lbl">УЛОЖИТЬ СПАТЬ</span>
+      <span class="cd" id="cdSleep"></span>
+    </button>
+    <button class="btn btn-pet" id="btnPet">
+      <span class="ico">🐾</span>
+      <span class="lbl">ПОГЛАДИТЬ</span>
+      <span class="cd" id="cdPet"></span>
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ SVG TEMPLATES ═══════════════ -->
+<template id="svgHappy">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tailWag 3s infinite ease-in-out alternate;}
+    @keyframes tailWag{from{transform:rotate(-15deg)}to{transform:rotate(25deg)}}
+    .ear-l{transform-origin:35px 35px;animation:earTwitch 4s infinite;}
+    .ear-r{transform-origin:65px 35px;animation:earTwitch 5s infinite 1s;}
+    @keyframes earTwitch{0%,90%,100%{transform:rotate(0)}92%,96%{transform:rotate(-5deg) scale(1.05)}94%{transform:rotate(5deg)}}
+    .eye{animation:blink 4s infinite;transform-origin:center;}
+    @keyframes blink{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(0)}}
+  </style>
+  <defs><linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg1)"/>
+  <g>
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg1)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="eye" cx="40" cy="55" r="2.5" fill="#5E4433"/>
+    <circle class="eye" cx="60" cy="55" r="2.5" fill="#5E4433"/>
+    <path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+</template>
+
+<template id="svgSleeping">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tw 6s infinite ease-in-out alternate;}
+    @keyframes tw{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+    .body-group{animation:db 5s infinite ease-in-out;transform-origin:50% 85%;}
+    @keyframes db{0%,100%{transform:scale(1,1)}50%{transform:scale(1.01,.98) translateY(2px)}}
+    .ear-l{transform-origin:35px 35px;transform:rotate(5deg) scale(.95);}
+    .ear-r{transform-origin:65px 35px;transform:rotate(-5deg) scale(.95);}
+  </style>
+  <defs><linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg2)"/>
+  <g class="body-group">
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg2)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M38 55 Q 40 53 42 55" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M58 55 Q 60 53 62 55" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+</template>
+
+<template id="svgEating">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tw 2s infinite ease-in-out alternate;}
+    @keyframes tw{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+    .ear-l{transform-origin:35px 35px;animation:ef 1s infinite;}
+    .ear-r{transform-origin:65px 35px;animation:ef 1s infinite .5s;}
+    @keyframes ef{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) scale(1.05)}}
+    .mouth{animation:chew .5s infinite alternate;transform-origin:50px 62px;}
+    @keyframes chew{from{transform:scaleY(1)}to{transform:scaleY(.5) translateY(2px)}}
+    .food{animation:fb 1s infinite ease-in-out;}
+    @keyframes fb{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(-5px);opacity:.8}}
+  </style>
+  <defs><linearGradient id="cg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg3)"/>
+  <g>
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg3)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="40" cy="55" r="2.5" fill="#5E4433"/>
+    <circle cx="60" cy="55" r="2.5" fill="#5E4433"/>
+    <g class="mouth"><path d="M45 62 Q 50 67 55 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+    <g stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="food" cx="50" cy="75" r="5" fill="#8B4513" stroke="#5E4433" stroke-width="1"/>
+  </g>
+</svg>
+</template>
+
+<template id="svgPlaying">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tw .8s infinite ease-in-out alternate;}
+    @keyframes tw{from{transform:rotate(-25deg)}to{transform:rotate(40deg)}}
+    .ear-l{transform-origin:35px 35px;animation:ea .6s infinite alternate;}
+    .ear-r{transform-origin:65px 35px;animation:ea .6s infinite alternate .3s;}
+    @keyframes ea{from{transform:rotate(-5deg) scale(1.05)}to{transform:rotate(5deg) scale(1.08)}}
+    .paw-l{animation:ps .8s infinite ease-in-out;}
+    .paw-r{animation:ps .8s infinite ease-in-out .4s;}
+    @keyframes ps{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+    .whiskers{animation:wm .5s infinite alternate;}
+    @keyframes wm{from{transform:translateY(0) rotate(0)}to{transform:translateY(-2px) rotate(5deg)}}
+  </style>
+  <defs><linearGradient id="cg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg4)"/>
+  <g>
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg4)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="40" cy="55" rx="3.5" ry="4" fill="#5E4433"/>
+    <ellipse cx="60" cy="55" rx="3.5" ry="4" fill="#5E4433"/>
+    <path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g class="whiskers" stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect class="paw-l" x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect class="paw-r" x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+</template>
+
+<template id="svgSad">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tw 8s infinite ease-in-out alternate;}
+    @keyframes tw{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+    .ear-l{transform-origin:35px 35px;transform:rotate(15deg) translateY(5px);}
+    .ear-r{transform-origin:65px 35px;transform:rotate(-15deg) translateY(5px);}
+    .mouth-sad{animation:sm 3s infinite ease-in-out alternate;}
+    @keyframes sm{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}
+    .tear{animation:td 2s infinite ease-in-out;opacity:0;}
+    @keyframes td{0%{transform:translateY(0) scale(0);opacity:0}20%{transform:translateY(0) scale(1);opacity:1}80%{transform:translateY(10px) scale(1);opacity:1}100%{transform:translateY(15px) scale(0);opacity:0}}
+  </style>
+  <defs><linearGradient id="cg5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg5)"/>
+  <g>
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg5)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="40" cy="55" r="2.5" fill="#5E4433"/>
+    <circle cx="60" cy="55" r="2.5" fill="#5E4433"/>
+    <path class="mouth-sad" d="M48 65 Q 50 62 52 65" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="tear" cx="37" cy="60" r="2" fill="#87CEEB"/>
+  </g>
+</svg>
+</template>
+
+<template id="svgAngry">
+<svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tail{transform-origin:45px 75px;animation:tw .6s infinite ease-in-out alternate;}
+    @keyframes tw{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+    .ear-l{transform-origin:35px 35px;transform:rotate(20deg) translateY(8px);}
+    .ear-r{transform-origin:65px 35px;transform:rotate(-20deg) translateY(8px);}
+    .body-group{transform:scale(1.05,1.05);animation:ap 1s infinite alternate;}
+    @keyframes ap{from{transform:scale(1.05,1.05)}to{transform:scale(1.07,1.03)}}
+    .mouth-angry{animation:am .3s infinite alternate;}
+    @keyframes am{from{transform:scale(1)}to{transform:scale(1.2) translateY(1px)}}
+  </style>
+  <defs><linearGradient id="cg6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+  <path class="tail" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#cg6)"/>
+  <g class="body-group">
+    <path class="ear-l" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path class="ear-r" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#cg6)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="40" cy="55" r="2.5" fill="#5E4433"/>
+    <circle cx="60" cy="55" r="2.5" fill="#5E4433"/>
+    <path class="mouth-angry" d="M45 63 H55" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g stroke="#5E4433" stroke-width="1" opacity="0.7">
+      <line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/>
+      <line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/>
+    </g>
+    <rect x="30" y="80" width="20" height="8" rx="4" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(5 40 84)"/>
+    <rect x="50" y="80" width="20" height="8" rx="4" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-5 60 84)"/>
+    <circle cx="35" cy="60" r="4" fill="#FFC0CB" opacity="0.7"/>
+    <circle cx="65" cy="60" r="4" fill="#FFC0CB" opacity="0.7"/>
+  </g>
+</svg>
+</template>
+
+<!-- ═══════════════ GAME SCRIPT ═══════════════ -->
+<script>
+// ─── Stars ───
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 70; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = .5 + Math.random() * 1.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s`;
+  starsEl.appendChild(s);
+}
+
+// ─── State ───
+const state = {
+  hunger:  80,   // 0–100: food level
+  happy:   80,   // 0–100
+  energy:  90,   // 0–100
+  age:     0,    // days (ticks / 144)
+  level:   1,
+  ticks:   0,
+  sleeping: false,
+  currentAnim: 'happy', // happy | sleeping | eating | playing | sad | angry
+  actionLock: false,
+  cooldowns: { feed:0, play:0, sleep:0, pet:0 }
+};
+
+// ─── SVG map ───
+const svgMap = {
+  happy:    document.getElementById('svgHappy').innerHTML,
+  sleeping: document.getElementById('svgSleeping').innerHTML,
+  eating:   document.getElementById('svgEating').innerHTML,
+  playing:  document.getElementById('svgPlaying').innerHTML,
+  sad:      document.getElementById('svgSad').innerHTML,
+  angry:    document.getElementById('svgAngry').innerHTML,
+};
+
+// ─── DOM refs ───
+const catSvg    = document.getElementById('catSvg');
+const barH      = document.getElementById('barHunger');
+const barHp     = document.getElementById('barHappy');
+const barE      = document.getElementById('barEnergy');
+const valH      = document.getElementById('valHunger');
+const valHp     = document.getElementById('valHappy');
+const valE      = document.getElementById('valEnergy');
+const msgbox    = document.getElementById('msgbox');
+const stateBadge= document.getElementById('stateBadge');
+const screen    = document.getElementById('screen');
+const ageEl     = document.getElementById('ageVal');
+const lvlEl     = document.getElementById('lvlVal');
+
+// ─── Bar color helpers ───
+function barColor(v) {
+  if (v > 60) return 'var(--green)';
+  if (v > 30) return 'var(--yellow)';
+  return 'var(--red)';
+}
+function hungerColor(v) {
+  if (v > 60) return 'var(--green)';
+  if (v > 30) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+// ─── Render bars ───
+function renderBars() {
+  const h = Math.round(state.hunger);
+  const hp = Math.round(state.happy);
+  const e = Math.round(state.energy);
+  barH.style.width  = h  + '%'; barH.style.background  = hungerColor(h);  valH.textContent  = h;
+  barHp.style.width = hp + '%'; barHp.style.background = barColor(hp);     valHp.textContent = hp;
+  barE.style.width  = e  + '%'; barE.style.background  = 'var(--blue)';   valE.textContent  = e;
+  ageEl.textContent = state.age;
+  lvlEl.textContent = state.level;
+}
+
+// ─── Set cat visual state ───
+function setCatState(s) {
+  if (state.currentAnim === s) return;
+  state.currentAnim = s;
+  catSvg.style.opacity = '0';
+  setTimeout(() => {
+    catSvg.innerHTML = svgMap[s];
+    catSvg.style.opacity = '1';
+  }, 200);
+  document.body.className = 'state-' + s;
+}
+
+// ─── Badge & messages ───
+const badgeConf = {
+  happy:    { text:'😊 Доволен',   color:'#3ECF8E', bg:'rgba(62,207,142,.12)' },
+  sleeping: { text:'💤 Спит',      color:'#8B60D4', bg:'rgba(139,96,212,.12)' },
+  eating:   { text:'🐟 Ест',       color:'#F0C040', bg:'rgba(240,192,64,.12)' },
+  playing:  { text:'🧶 Играет',    color:'#4A7FD4', bg:'rgba(74,127,212,.12)' },
+  sad:      { text:'😢 Грустит',   color:'#87CEEB', bg:'rgba(135,206,235,.12)' },
+  angry:    { text:'😾 Голодный',  color:'#E05252', bg:'rgba(224,82,82,.12)' },
+};
+function updateBadge(s) {
+  const c = badgeConf[s];
+  stateBadge.textContent = c.text;
+  stateBadge.style.color = c.color;
+  stateBadge.style.borderColor = c.color;
+  stateBadge.style.background = c.bg;
+}
+
+function setMsg(txt, active=true) {
+  msgbox.style.opacity = '0';
+  setTimeout(() => {
+    msgbox.textContent = txt;
+    msgbox.classList.toggle('active', active);
+    msgbox.style.opacity = '1';
+  }, 180);
+}
+
+// ─── Determine visual state (not overriding temp animations) ───
+function computeState() {
+  if (state.sleeping) return 'sleeping';
+  if (state.hunger < 20) return 'angry';
+  if (state.happy < 25) return 'sad';
+  return 'happy';
+}
+
+// ─── Critical flash ───
+function setCritical(on) {
+  screen.classList.toggle('alert', on);
+}
+
+// ─── Main tick (every 4s) ───
+const TICK_MS = 4000;
+let critMsgCooldown = 0;
+
+const idleMessages = {
+  happy:    ['Мур-р… всё хорошо 🧡', 'Смотрю в окно на звёзды…', 'Нашёл тёплое место на диване ✨', 'Полно энергии и счастья~'],
+  sleeping: ['zZz…','Снятся рыбки…','Тихо-тихо, котик спит 💤'],
+  sad:      ['Мне немного одиноко…', 'Поиграй со мной, пожалуйста…', 'Погладь меня? 🥺'],
+  angry:    ['Я. ГОЛОДЕН. 😾', 'Где рыба?! НЕМЕДЛЕННО.', 'Мяу! Голодный котик — опасный котик!'],
+};
+
+setInterval(() => {
+  state.ticks++;
+
+  // Decay
+  if (state.sleeping) {
+    state.energy  = Math.min(100, state.energy + 6);
+    state.hunger  = Math.max(0, state.hunger - 1);
+    state.happy   = Math.max(0, state.happy - 0.5);
+    // Wake automatically
+    if (state.energy >= 100) {
+      state.sleeping = false;
+      setMsg('Рыжик проснулся! 🌅 Полон сил!');
+      document.getElementById('btnSleep').classList.remove('sleeping-active');
+    }
+  } else {
+    state.hunger  = Math.max(0, state.hunger - 2.5);
+    state.happy   = Math.max(0, state.happy  - 1.2);
+    state.energy  = Math.max(0, state.energy - 0.8);
+  }
+
+  // Level up
+  if (state.ticks % 30 === 0) {
+    state.age++;
+    if (state.age % 3 === 0) { state.level++; showToast('🎉 Уровень ' + state.level + '!'); }
+  }
+
+  // Cooldowns
+  for (const k in state.cooldowns) {
+    if (state.cooldowns[k] > 0) {
+      state.cooldowns[k]--;
+      updateCDDisplay(k);
+    }
+  }
+
+  // Forced sleep on 0 energy
+  if (state.energy <= 0 && !state.sleeping) {
+    state.sleeping = true;
+    setMsg('Рыжик сам уснул — слишком устал 😴');
+    document.getElementById('btnSleep').classList.add('sleeping-active');
+  }
+
+  // Visual state
+  if (!state.actionLock) {
+    const vs = computeState();
+    setCatState(vs);
+    updateBadge(vs);
+    setCritical(state.hunger < 20 || state.happy < 20);
+
+    // Idle messages
+    if (critMsgCooldown <= 0) {
+      const msgs = idleMessages[vs] || idleMessages.happy;
+      if (Math.random() < .4) {
+        setMsg(msgs[Math.floor(Math.random()*msgs.length)]);
+        if (vs === 'angry' || vs === 'sad') critMsgCooldown = 3;
+      }
+    } else critMsgCooldown--;
+  }
+
+  renderBars();
+}, TICK_MS);
+
+// ─── CD display ───
+function updateCDDisplay(action) {
+  const cdEl = document.getElementById('cd' + action.charAt(0).toUpperCase() + action.slice(1));
+  const btn  = document.getElementById('btn' + action.charAt(0).toUpperCase() + action.slice(1));
+  const cd   = state.cooldowns[action];
+  if (cd > 0) {
+    cdEl.textContent = cd + 's кд';
+    btn.classList.add('disabled');
+  } else {
+    cdEl.textContent = '';
+    btn.classList.remove('disabled');
+  }
+}
+
+// ─── Temp animation lock ───
+function tempAnim(animName, durationMs, afterMsg) {
+  state.actionLock = true;
+  setCatState(animName);
+  updateBadge(animName);
+  setTimeout(() => {
+    state.actionLock = false;
+    if (afterMsg) setMsg(afterMsg);
+    const vs = computeState();
+    setCatState(vs);
+    updateBadge(vs);
+  }, durationMs);
+}
+
+// ─── Actions ───
+document.getElementById('btnFeed').addEventListener('click', () => {
+  if (state.cooldowns.feed > 0) return;
+  state.hunger = Math.min(100, state.hunger + 30);
+  state.happy  = Math.min(100, state.happy  + 5);
+  state.cooldowns.feed = 5;
+  updateCDDisplay('feed');
+  setMsg('Рыжик с аппетитом ест рыбку! 🐟');
+  spawnFloaty(event.clientX, event.clientY, ['🐟','✨','💛']);
+  tempAnim('eating', 3000, 'Объелся… хорошо-то как~');
+  renderBars();
+});
+
+document.getElementById('btnPlay').addEventListener('click', (event) => {
+  if (state.cooldowns.play > 0 || state.sleeping) return;
+  state.happy  = Math.min(100, state.happy  + 25);
+  state.energy = Math.max(0,   state.energy - 18);
+  state.hunger = Math.max(0,   state.hunger - 5);
+  state.cooldowns.play = 7;
+  updateCDDisplay('play');
+  setMsg('Рыжик гоняется за клубком! 🧶');
+  spawnFloaty(event.clientX, event.clientY, ['🧶','⚡','💛','😸']);
+  tempAnim('playing', 3000, 'Устал, но счастлив ✨');
+  renderBars();
+});
+
+document.getElementById('btnSleep').addEventListener('click', (event) => {
+  if (state.cooldowns.sleep > 0) return;
+  state.sleeping = !state.sleeping;
+  const btn = document.getElementById('btnSleep');
+  if (state.sleeping) {
+    setMsg('Рыжик свернулся клубочком 💤');
+    btn.classList.add('sleeping-active');
+    spawnFloaty(event.clientX, event.clientY, ['💤','🌙','⭐']);
+    setCatState('sleeping'); updateBadge('sleeping');
+  } else {
+    setMsg('Рыжик проснулся! Бодрый и готов к приключениям 🌅');
+    btn.classList.remove('sleeping-active');
+    state.cooldowns.sleep = 4;
+    updateCDDisplay('sleep');
+  }
+  renderBars();
+});
+
+document.getElementById('btnPet').addEventListener('click', (event) => {
+  if (state.cooldowns.pet > 0) return;
+  state.happy = Math.min(100, state.happy + 12);
+  state.cooldowns.pet = 2;
+  updateCDDisplay('pet');
+  const lines = ['Мур-р… мне нравится 🧡', 'Ещё, пожалуйста~', 'Урр-урр… тепло и хорошо…', 'Мяу! Ты лучший 🐾'];
+  setMsg(lines[Math.floor(Math.random()*lines.length)]);
+  spawnFloaty(event.clientX, event.clientY, ['🧡','❤️','🐾','✨']);
+  renderBars();
+});
+
+// Clicking the cat pets it
+document.getElementById('catWrap').addEventListener('click', (event) => {
+  if (state.cooldowns.pet > 0) return;
+  state.happy = Math.min(100, state.happy + 8);
+  state.cooldowns.pet = 2;
+  updateCDDisplay('pet');
+  const lines = ['Мяу! 🧡', 'Мурр~', 'Пур-пур-пур… ✨', 'Рад тебя видеть!'];
+  setMsg(lines[Math.floor(Math.random()*lines.length)]);
+  spawnFloaty(event.clientX, event.clientY, ['🧡','💛','✨']);
+  renderBars();
+});
+
+// ─── Floaty emojis ───
+function spawnFloaty(x, y, set) {
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('div');
+    el.className = 'floaty';
+    el.textContent = set[Math.floor(Math.random()*set.length)];
+    el.style.left = (x + (Math.random()-.5)*70) + 'px';
+    el.style.top  = (y + (Math.random()-.5)*30) + 'px';
+    el.style.animationDelay = Math.random()*.25 + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+  }
+}
+
+// ─── Toast ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Init ───
+catSvg.innerHTML = svgMap.happy;
+renderBars();
+updateBadge('happy');
+
+// Tick CD display init
+for (const k in state.cooldowns) updateCDDisplay(k);
+</script>
+</body>
+</html>
