@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Рыжик — Тамагочи</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07090F;--surface:#0D1019;--card:#111520;--card2:#161C2C;
+  --border:#1E2538;--border2:#28324A;
+  --orange:#FFB347;--orange2:#FF8C00;--rust:#D84E18;
+  --blue:#4B82D6;--green:#3ECF8E;--red:#E05252;
+  --yellow:#F0C040;--purple:#8B60D4;--cyan:#38BDF8;--pink:#EC4899;
+  --muted:#4A5470;--subtle:#7B8CAA;--text:#D0DCFA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:1.2rem;overflow:hidden;position:relative;
+}
+.stars{position:fixed;inset:0;pointer-events:none;}
+.star{position:absolute;background:white;border-radius:50%;animation:twinkle linear infinite;}
+@keyframes twinkle{0%,100%{opacity:.08}50%{opacity:.6}}
+body::before{
+  content:'';position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);
+  width:500px;height:350px;
+  background:radial-gradient(ellipse,rgba(59,100,200,.05) 0%,transparent 70%);
+  pointer-events:none;
+}
+.device{
+  position:relative;z-index:1;width:100%;max-width:390px;
+  background:var(--card);border:1px solid var(--border);border-radius:2.4rem;
+  padding:1.5rem 1.4rem 1.6rem;
+  box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 40px 80px rgba(0,0,0,.6),0 0 60px rgba(59,100,200,.06);
+  display:flex;flex-direction:column;gap:1rem;
+}
+.hdr{display:flex;justify-content:space-between;align-items:center;}
+.hname{
+  font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;
+  background:linear-gradient(135deg,var(--orange),var(--rust));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hright{display:flex;gap:.8rem;}
+.hbadge{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);border-radius:.6rem;padding:.22rem .6rem;
+}
+.hbadge span{color:var(--orange);font-weight:600;}
+.screen{
+  background:var(--surface);border:1px solid var(--border);border-radius:1.6rem;
+  padding:1.3rem 1.2rem 1.1rem;
+  display:flex;flex-direction:column;align-items:center;gap:.9rem;
+  position:relative;overflow:hidden;min-height:260px;
+  box-shadow:inset 0 2px 20px rgba(0,0,0,.3);
+}
+.screen::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 3px);
+  pointer-events:none;border-radius:1.6rem;
+}
+.sbadge{
+  position:absolute;top:.9rem;right:1rem;
+  font-size:.65rem;font-weight:700;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:.22rem .65rem;border-radius:2rem;border:1px solid;transition:all .4s;z-index:2;
+}
+.cat-wrap{position:relative;cursor:pointer;transition:transform .25s;user-select:none;}
+.cat-wrap:hover{transform:scale(1.06);}
+.cat-wrap:active{transform:scale(.94);}
+.cat-svg{display:block;transition:opacity .35s;}
+.zzz-wrap{position:absolute;top:-8px;right:-18px;display:none;pointer-events:none;}
+.zzz{display:block;font-family:'Baloo 2',cursive;font-weight:800;color:var(--purple);opacity:0;animation:zF 2s infinite ease-in-out;}
+.zzz:nth-child(1){font-size:.9rem;animation-delay:0s;}
+.zzz:nth-child(2){font-size:1.1rem;animation-delay:.6s;}
+.zzz:nth-child(3){font-size:1.3rem;animation-delay:1.2s;}
+@keyframes zF{0%{opacity:0;transform:translateY(0) scale(.7)}30%{opacity:1}80%{opacity:.3}100%{opacity:0;transform:translateY(-16px) scale(1.2)}}
+body.state-sleeping .zzz-wrap{display:block;}
+.sick-wrap{position:absolute;top:-8px;left:-18px;display:none;pointer-events:none;}
+.germ{display:block;font-size:.9rem;opacity:0;animation:gF 2.5s infinite ease-in-out;}
+.germ:nth-child(2){animation-delay:.8s;font-size:.7rem;}.germ:nth-child(3){animation-delay:1.6s;font-size:1rem;}
+@keyframes gF{0%{opacity:0;transform:translateY(0)}30%{opacity:1}80%{opacity:.2}100%{opacity:0;transform:translateY(-14px) rotate(180deg)}}
+body.state-sick .sick-wrap{display:block;}
+.bars{width:100%;display:flex;flex-direction:column;gap:.45rem;}
+.bar-row{display:flex;align-items:center;gap:.6rem;}
+.bar-icon{font-size:.85rem;width:1.2rem;text-align:center;}
+.bar-label{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--muted);width:4.2rem;}
+.bar-track{flex:1;height:7px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.04);}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease,background .5s ease;}
+.bar-val{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--subtle);width:2.2rem;text-align:right;}
+.msg{
+  width:100%;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:.9rem;
+  padding:.6rem .95rem;font-size:.82rem;color:var(--muted);font-style:italic;
+  text-align:center;min-height:2.4rem;transition:opacity .25s;line-height:1.4;
+}
+.msg.on{color:var(--text);font-style:normal;}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;}
+.btn{
+  background:var(--card2);border:1.5px solid var(--border);border-radius:1rem;
+  padding:.75rem .4rem;display:flex;flex-direction:column;align-items:center;gap:.25rem;
+  cursor:pointer;transition:all .18s;font-family:'Nunito',sans-serif;
+  position:relative;overflow:hidden;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:scale(.95);}
+.btn .ico{font-size:1.35rem;line-height:1;}
+.btn .lbl{font-size:.68rem;font-weight:700;letter-spacing:.02em;color:var(--muted);transition:color .2s;line-height:1;}
+.btn .cd{font-size:.6rem;font-family:'JetBrains Mono',monospace;color:var(--muted);min-height:.8rem;}
+.btn-feed:hover{border-color:rgba(62,207,142,.45);background:rgba(62,207,142,.06);} .btn-feed:hover .lbl{color:var(--green);}
+.btn-play:hover{border-color:rgba(75,130,214,.45);background:rgba(75,130,214,.06);} .btn-play:hover .lbl{color:var(--blue);}
+.btn-bath:hover{border-color:rgba(56,189,248,.45);background:rgba(56,189,248,.06);} .btn-bath:hover .lbl{color:var(--cyan);}
+.btn-sleep:hover{border-color:rgba(139,96,212,.45);background:rgba(139,96,212,.06);} .btn-sleep:hover .lbl{color:var(--purple);}
+.btn-pet:hover{border-color:rgba(255,179,71,.45);background:rgba(255,179,71,.06);} .btn-pet:hover .lbl{color:var(--orange);}
+.btn-meds:hover{border-color:rgba(236,72,153,.45);background:rgba(236,72,153,.06);} .btn-meds:hover .lbl{color:var(--pink);}
+.btn.off{opacity:.35;pointer-events:none;}
+.btn.active-state{border-color:rgba(139,96,212,.6);background:rgba(139,96,212,.1);}
+.btn.active-state .lbl{color:var(--purple);}
+.floaty{position:fixed;pointer-events:none;font-size:1.3rem;z-index:999;animation:fUp 1.1s ease-out forwards;}
+@keyframes fUp{0%{opacity:1;transform:translateY(0) scale(.7)}100%{opacity:0;transform:translateY(-85px) scale(1.9) rotate(18deg)}}
+.toast{
+  position:fixed;bottom:1.6rem;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--border2);border-radius:2rem;
+  padding:.5rem 1.3rem;font-size:.8rem;color:var(--orange);
+  opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;z-index:100;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes cFlash{0%,100%{background:var(--surface)}50%{background:rgba(224,82,82,.1)}}
+.screen.crit{animation:cFlash .9s infinite;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="device">
+  <div class="hdr">
+    <div class="hname">🐱 Рыжик</div>
+    <div class="hright">
+      <div class="hbadge">Возраст <span id="ageVal">0</span>д</div>
+      <div class="hbadge">Ур. <span id="lvlVal">1</span></div>
+    </div>
+  </div>
+  <div class="screen" id="screen">
+    <div class="sbadge" id="sbadge">😊 Доволен</div>
+    <div class="cat-wrap" id="catWrap">
+      <div class="zzz-wrap"><span class="zzz">z</span><span class="zzz">z</span><span class="zzz">Z</span></div>
+      <div class="sick-wrap"><span class="germ">🦠</span><span class="germ">💊</span><span class="germ">🌡️</span></div>
+      <div class="cat-svg" id="catSvg"></div>
+    </div>
+    <div class="bars">
+      <div class="bar-row"><span class="bar-icon">🍖</span><span class="bar-label">Голод</span><div class="bar-track"><div class="bar-fill" id="bHunger"></div></div><span class="bar-val" id="vHunger">80</span></div>
+      <div class="bar-row"><span class="bar-icon">💛</span><span class="bar-label">Счастье</span><div class="bar-track"><div class="bar-fill" id="bHappy"></div></div><span class="bar-val" id="vHappy">80</span></div>
+      <div class="bar-row"><span class="bar-icon">⚡</span><span class="bar-label">Энергия</span><div class="bar-track"><div class="bar-fill" id="bEnergy"></div></div><span class="bar-val" id="vEnergy">90</span></div>
+      <div class="bar-row"><span class="bar-icon">❤️</span><span class="bar-label">Здоровье</span><div class="bar-track"><div class="bar-fill" id="bHealth"></div></div><span class="bar-val" id="vHealth">100</span></div>
+      <div class="bar-row"><span class="bar-icon">🚿</span><span class="bar-label">Чистота</span><div class="bar-track"><div class="bar-fill" id="bClean"></div></div><span class="bar-val" id="vClean">90</span></div>
+    </div>
+    <div class="msg" id="msg">Нажми на котика или выбери действие…</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-feed"  id="btnFeed"><span class="ico">🐟</span><span class="lbl">ПОКОРМИТЬ</span><span class="cd" id="cdFeed"></span></button>
+    <button class="btn btn-play"  id="btnPlay"><span class="ico">🧶</span><span class="lbl">ПОИГРАТЬ</span><span class="cd" id="cdPlay"></span></button>
+    <button class="btn btn-bath"  id="btnBath"><span class="ico">🛁</span><span class="lbl">ПОМЫТЬ</span><span class="cd" id="cdBath"></span></button>
+    <button class="btn btn-sleep" id="btnSleep"><span class="ico">🛋️</span><span class="lbl">СПАТЬ</span><span class="cd" id="cdSleep"></span></button>
+    <button class="btn btn-pet"   id="btnPet"><span class="ico">🐾</span><span class="lbl">ПОГЛАДИТЬ</span><span class="cd" id="cdPet"></span></button>
+    <button class="btn btn-meds"  id="btnMeds"><span class="ico">💊</span><span class="lbl">ЛЕЧИТЬ</span><span class="cd" id="cdMeds"></span></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- SVG TEMPLATES -->
+<template id="tHappy">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.t{transform-origin:45px 75px;animation:tw 3s infinite ease-in-out alternate;}@keyframes tw{from{transform:rotate(-15deg)}to{transform:rotate(25deg)}}.el{transform-origin:35px 35px;animation:et 4s infinite;}.er{transform-origin:65px 35px;animation:et 5s infinite 1s;}@keyframes et{0%,90%,100%{transform:rotate(0)}92%,96%{transform:rotate(-5deg) scale(1.05)}94%{transform:rotate(5deg)}}.ey{animation:bl 4s infinite;transform-origin:center;}@keyframes bl{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(0)}}</style>
+<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFAB4A"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path class="t" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#g1)"/>
+<g><path class="el" d="M30 40 L25 20 L45 35 Z" fill="#FFAB4A" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="er" d="M70 40 L75 20 L55 35 Z" fill="#FFAB4A" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30 85 h40 c 10 0 15 -7 15 -15 v-15 c 0 -15 -10 -25 -35 -25 s -35 10 -35 25 v 15 c 0 8 5 15 15 15z" fill="url(#g1)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle class="ey" cx="40" cy="55" r="2.5" fill="#5E4433"/><circle class="ey" cx="60" cy="55" r="2.5" fill="#5E4433"/>
+<path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<g stroke="#5E4433" stroke-width="1" opacity="0.7"><line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/><line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/></g>
+<rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>
+</template>
+
+<template id="tSleeping">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.t{transform-origin:45px 75px;animation:tw 6s infinite ease-in-out alternate;}@keyframes tw{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}.bg{animation:db 5s infinite ease-in-out;transform-origin:50% 85%;}@keyframes db{0%,100%{transform:scale(1)}50%{transform:scale(1.01,.98) translateY(2px)}}.el{transform-origin:35px 35px;transform:rotate(5deg) scale(.95);}.er{transform-origin:65px 35px;transform:rotate(-5deg) scale(.95);}</style>
+<defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path class="t" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#g2)"/>
+<g class="bg"><path class="el" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="er" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#g2)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38 55 Q 40 53 42 55" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M58 55 Q 60 53 62 55" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<g stroke="#5E4433" stroke-width="1" opacity="0.7"><line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/><line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/></g>
+<rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>
+</template>
+
+<template id="tEating">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.fish{transform-origin:50px 65px;animation:ef 2s infinite linear;}.jaw{transform-origin:50px 62px;animation:chew .5s infinite;}@keyframes ef{0%{transform:scale(1) translateX(0);opacity:1}50%{transform:scale(.5) translateX(-5px);opacity:.5}100%{transform:scale(0);opacity:0}}@keyframes chew{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.3)}}</style>
+<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFAB4A"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path fill="url(#g3)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M30 85 h40 c 10 0 15 -7 15 -15 v-15 c 0 -15 -10 -25 -35 -25 s -35 10 -35 25 v 15 c 0 8 5 15 15 15z"/>
+<g class="fish"><path fill="#7FB3D5" d="M45 65 q 5 -5 10 0 q -5 5 -10 0 M55 65 l 4 -2 v 4 z" stroke="#5E4433" stroke-width="1"/></g>
+<path class="jaw" d="M45 62 q 5 6 10 0" stroke="#5E4433" stroke-width="2" fill="none"/>
+<circle cx="42" cy="55" r="2.5" fill="#5E4433"/><circle cx="58" cy="55" r="2.5" fill="#5E4433"/>
+</svg>
+</template>
+
+<template id="tPlaying">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.t{transform-origin:45px 75px;animation:tw .8s infinite ease-in-out alternate;}@keyframes tw{from{transform:rotate(-25deg)}to{transform:rotate(40deg)}}.el{transform-origin:35px 35px;animation:ea .6s infinite alternate;}.er{transform-origin:65px 35px;animation:ea .6s infinite alternate .3s;}@keyframes ea{from{transform:rotate(-5deg) scale(1.05)}to{transform:rotate(5deg) scale(1.08)}}.pl{animation:ps .8s infinite ease-in-out;}.pr{animation:ps .8s infinite ease-in-out .4s;}@keyframes ps{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}.wh{animation:wm .5s infinite alternate;}@keyframes wm{from{transform:translateY(0) rotate(0)}to{transform:translateY(-2px) rotate(5deg)}}</style>
+<defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path class="t" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#g4)"/>
+<g><path class="el" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="er" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#g4)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="40" cy="55" rx="3.5" ry="4" fill="#5E4433"/><ellipse cx="60" cy="55" rx="3.5" ry="4" fill="#5E4433"/>
+<path d="M48 62 Q 50 65 52 62" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<g class="wh" stroke="#5E4433" stroke-width="1" opacity="0.7"><line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/><line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/></g>
+<rect class="pl" x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect class="pr" x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>
+</template>
+
+<template id="tSad">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.t{transform-origin:45px 75px;animation:tw 8s infinite ease-in-out alternate;}@keyframes tw{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}.el{transform-origin:35px 35px;transform:rotate(15deg) translateY(5px);}.er{transform-origin:65px 35px;transform:rotate(-15deg) translateY(5px);}.ms{animation:sm 3s infinite ease-in-out alternate;}@keyframes sm{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}.tr{animation:td 2s infinite ease-in-out;opacity:0;}@keyframes td{0%{transform:translateY(0) scale(0);opacity:0}20%{transform:translateY(0) scale(1);opacity:1}80%{transform:translateY(10px) scale(1);opacity:1}100%{transform:translateY(15px) scale(0);opacity:0}}</style>
+<defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path class="t" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#g5)"/>
+<g><path class="el" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="er" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30 85 Q 20 85 20 70 Q 20 40 50 40 Q 80 40 80 70 Q 80 85 70 85 Z" fill="url(#g5)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="40" cy="55" r="2.5" fill="#5E4433"/><circle cx="60" cy="55" r="2.5" fill="#5E4433"/>
+<path class="ms" d="M48 65 Q 50 62 52 65" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<g stroke="#5E4433" stroke-width="1" opacity="0.7"><line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/><line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/></g>
+<rect x="35" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="55" y="82" width="10" height="6" rx="3" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle class="tr" cx="37" cy="60" r="2" fill="#87CEEB"/></g>
+</svg>
+</template>
+
+<template id="tAngry">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.bg{animation:puff .5s infinite alternate;transform-origin:50px 85px;}@keyframes puff{from{transform:scale(1)}to{transform:scale(1.05,1.02)}}.es{transform-origin:center;animation:ae .5s infinite alternate;}@keyframes ae{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.5)}}.t{transform-origin:45px 75px;animation:tw .6s infinite ease-in-out alternate;}@keyframes tw{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}.el{transform-origin:35px 35px;transform:rotate(20deg) translateY(8px);}.er{transform-origin:65px 35px;transform:rotate(-20deg) translateY(8px);}</style>
+<defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<path class="t" d="M45 75 C 30 75,20 60,25 45 C 28 35,40 35,42 45" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="url(#g6)"/>
+<g class="bg"><path class="el" d="M30 40 L25 20 L45 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path class="er" d="M70 40 L75 20 L55 35 Z" fill="#FFB347" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M30 85 h40 c 12 0 18 -9 18 -18 v-18 c 0 -18 -12 -30 -38 -30 s -38 12 -38 30 v 18 c 0 9 6 18 18 18z" fill="url(#g6)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse class="es" cx="42" cy="55" rx="2.5" ry="3" fill="#5E4433"/><ellipse class="es" cx="58" cy="55" rx="2.5" ry="3" fill="#5E4433"/>
+<path d="M47 62 h6" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<g stroke="#5E4433" stroke-width="1" opacity="0.7"><line x1="30" y1="60" x2="15" y2="58"/><line x1="30" y1="63" x2="15" y2="65"/><line x1="70" y1="60" x2="85" y2="58"/><line x1="70" y1="63" x2="85" y2="65"/></g>
+<rect x="30" y="80" width="20" height="8" rx="4" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(5 40 84)"/>
+<rect x="50" y="80" width="20" height="8" rx="4" fill="#FFD194" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-5 60 84)"/></g>
+</svg>
+</template>
+
+<template id="tSick">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.bs{animation:shiv .8s infinite alternate;transform-origin:50px 85px;}@keyframes shiv{0%,100%{transform:translateX(0) translateY(0)}50%{transform:translateX(1px) translateY(1px)}}.th{transform-origin:75px 25px;animation:fl 2s infinite ease-in-out alternate;}@keyframes fl{from{transform:translateY(-2px)}to{transform:translateY(2px)}}.mc{animation:pu 1.5s infinite alternate;}@keyframes pu{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.1)}}</style>
+<defs><linearGradient id="g7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFAB4A"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<g class="bs">
+<path fill="url(#g7)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M30 85 h40 c 10 0 15 -7 15 -15 v-15 c 0 -15 -10 -25 -35 -25 s -35 10 -35 25 v 15 c 0 8 5 15 15 15z"/>
+<path fill="#E8933A" d="M42 30 h16 l -2 8 h-12 z"/>
+<path fill="#FFAB4A" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M35 32 l -10 -15 l 15 10 z M65 32 l 10 -15 l -15 10 z"/>
+<circle cx="42" cy="58" r="2.5" fill="#5E4433"/><circle cx="58" cy="58" r="2.5" fill="#5E4433"/>
+<path d="M47 65 q 3 -4 6 0" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round"/>
+<line x1="30" y1="60" x2="15" y2="58" stroke="#5E4433" stroke-width="1" opacity="0.7"/>
+<line x1="70" y1="60" x2="85" y2="58" stroke="#5E4433" stroke-width="1" opacity="0.7"/>
+</g>
+<g class="th">
+<rect x="70" y="20" width="10" height="20" rx="3" fill="white" stroke="#5E4433" stroke-width="1"/>
+<circle cx="75" cy="40" r="4" fill="white" stroke="#5E4433" stroke-width="1"/>
+<rect class="mc" x="72.5" y="25" width="5" height="13" rx="2" fill="#E74C3C"/>
+</g>
+</svg>
+</template>
+
+<template id="tBathing">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.bw{transform-origin:50px 70px;animation:gf 3s infinite ease-in-out alternate;}@keyframes gf{from{transform:translateY(-2px)}to{transform:translateY(2px)}}.bu{fill:#C8E8F8;animation:br 3s infinite;opacity:0;}.bu:nth-child(2){animation-delay:1s;}.bu:nth-child(3){animation-delay:2s;}@keyframes br{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1}80%{opacity:1;transform:translateY(-20px) scale(1)}100%{opacity:0;transform:translateY(-30px) scale(1.2)}}</style>
+<defs><linearGradient id="g8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFAB4A"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<rect x="10" y="65" width="80" height="25" rx="10" fill="none" stroke="#5E4433" stroke-width="3"/>
+<rect x="10" y="65" width="80" height="25" rx="10" fill="#A7D9F0"/>
+<g class="bw">
+<path fill="url(#g8)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M30 85 h40 c 10 0 15 -7 15 -15 v-15 c 0 -15 -10 -25 -35 -25 s -35 10 -35 25 v 15 c 0 8 5 15 15 15z" transform="translate(0,-10)"/>
+<path fill="#E8933A" d="M42 30 h16 l -2 8 h-12 z" transform="translate(0,-10)"/>
+<path fill="#FFAB4A" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M35 32 l -10 -15 l 15 10 z M65 32 l 10 -15 l -15 10 z" transform="translate(0,-10)"/>
+<circle cx="42" cy="55" r="2.5" fill="#5E4433" transform="translate(0,-10)"/>
+<circle cx="58" cy="55" r="2.5" fill="#5E4433" transform="translate(0,-10)"/>
+<path d="M47 62 q 3 4 6 0" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round" transform="translate(0,-10)"/>
+</g>
+<circle class="bu" cx="25" cy="70" r="3"/>
+<circle class="bu" cx="75" cy="68" r="5"/>
+<circle class="bu" cx="50" cy="72" r="4"/>
+</svg>
+</template>
+
+<template id="tToilet">
+<svg width="160" height="160" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>.bt{transform-origin:50px 75px;animation:sm 4s infinite ease-in-out alternate;}@keyframes sm{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}</style>
+<defs><linearGradient id="g9" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFAB4A"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient></defs>
+<rect x="15" y="70" width="70" height="20" rx="8" fill="#B0C4DE" stroke="#5E4433" stroke-width="3"/>
+<rect x="20" y="73" width="60" height="15" rx="5" fill="#D3D3D3"/>
+<g class="bt">
+<path fill="url(#g9)" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M30 85 h40 c 10 0 15 -7 15 -15 v-15 c 0 -15 -10 -25 -35 -25 s -35 10 -35 25 v 15 c 0 8 5 15 15 15z" transform="translate(0,-10)"/>
+<path fill="#E8933A" d="M42 30 h16 l -2 8 h-12 z" transform="translate(0,-10)"/>
+<path fill="#FFAB4A" stroke="#5E4433" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M35 32 l -10 -15 l 15 10 z M65 32 l 10 -15 l -15 10 z" transform="translate(0,-10)"/>
+<circle cx="42" cy="55" r="2.5" fill="#5E4433" transform="translate(0,-10)"/>
+<circle cx="58" cy="55" r="2.5" fill="#5E4433" transform="translate(0,-10)"/>
+<path d="M47 62 q 3 4 6 0" stroke="#5E4433" stroke-width="2" fill="none" stroke-linecap="round" transform="translate(0,-10)"/>
+</g>
+</svg>
+</template>
+
+<script>
+// Stars
+const starsEl=document.getElementById('stars');
+for(let i=0;i<60;i++){const s=document.createElement('div');s.className='star';const sz=.4+Math.random()*1.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s`;starsEl.appendChild(s);}
+
+// SVG map
+const SVGS={};
+[['happy','tHappy'],['sleeping','tSleeping'],['eating','tEating'],['playing','tPlaying'],
+ ['sad','tSad'],['angry','tAngry'],['sick','tSick'],['bathing','tBathing'],['toilet','tToilet']
+].forEach(([k,id])=>{ SVGS[k]=document.getElementById(id).innerHTML; });
+
+// Game state
+const G={hunger:80,happy:80,energy:90,health:100,clean:90,age:0,level:1,ticks:0,sleeping:false,sick:false,anim:'',locked:false,cd:{feed:0,play:0,bath:0,sleep:0,pet:0,meds:0}};
+
+const catSvgEl=document.getElementById('catSvg');
+const screen=document.getElementById('screen');
+const sbadge=document.getElementById('sbadge');
+const msgEl=document.getElementById('msg');
+
+function setBar(id,val){
+  const fill=document.getElementById('b'+id);
+  const txt=document.getElementById('v'+id);
+  const v=Math.round(Math.max(0,Math.min(100,val)));
+  fill.style.width=v+'%'; txt.textContent=v;
+  let col;
+  if(id==='Energy') col='var(--blue)';
+  else if(id==='Health') col=v>60?'var(--green)':v>30?'var(--yellow)':'var(--red)';
+  else if(id==='Clean') col=v>60?'var(--cyan)':v>30?'var(--yellow)':'var(--red)';
+  else col=v>60?'var(--green)':v>30?'var(--yellow)':'var(--red)';
+  fill.style.background=col;
+}
+function renderBars(){
+  ['Hunger','Happy','Energy','Health','Clean'].forEach(k=>setBar(k,G[k.toLowerCase()]));
+  document.getElementById('ageVal').textContent=G.age;
+  document.getElementById('lvlVal').textContent=G.level;
+}
+
+const BADGES={
+  happy:   {text:'😊 Доволен', col:'#3ECF8E'},sleeping:{text:'💤 Спит',col:'#8B60D4'},
+  eating:  {text:'🐟 Ест',    col:'#F0C040'},playing: {text:'🧶 Играет',col:'#4B82D6'},
+  sad:     {text:'😢 Грустит',col:'#87CEEB'},angry:   {text:'😾 Злится',col:'#E05252'},
+  sick:    {text:'🤒 Болеет', col:'#EC4899'},bathing: {text:'🛁 Купается',col:'#38BDF8'},
+  toilet:  {text:'🚽 Туалет', col:'#B0C4DE'},
+};
+function setBadge(s){
+  const c=BADGES[s]||BADGES.happy;
+  sbadge.textContent=c.text; sbadge.style.color=c.col;
+  sbadge.style.borderColor=c.col; sbadge.style.background=c.col+'18';
+}
+function setMsg(txt,on=true){msgEl.style.opacity='0';setTimeout(()=>{msgEl.textContent=txt;msgEl.classList.toggle('on',on);msgEl.style.opacity='1';},180);}
+function setCat(s){
+  if(G.anim===s) return; G.anim=s;
+  catSvgEl.style.opacity='0';
+  setTimeout(()=>{catSvgEl.innerHTML=SVGS[s]||SVGS.happy;catSvgEl.style.opacity='1';},200);
+  document.body.className='state-'+s;
+}
+function computeState(){
+  if(G.sleeping) return 'sleeping';
+  if(G.sick) return 'sick';
+  if(G.hunger<20) return 'angry';
+  if(G.happy<25) return 'sad';
+  return 'happy';
+}
+function tempAnim(s,ms,afterMsg){
+  G.locked=true; setCat(s); setBadge(s);
+  setTimeout(()=>{G.locked=false;if(afterMsg)setMsg(afterMsg);const vs=computeState();setCat(vs);setBadge(vs);},ms);
+}
+function updateCD(key){
+  const K=key[0].toUpperCase()+key.slice(1);
+  const cdEl=document.getElementById('cd'+K);
+  const btn=document.getElementById('btn'+K);
+  if(!cdEl||!btn) return;
+  const v=G.cd[key];
+  if(v>0){cdEl.textContent=v+'s';btn.classList.add('off');}
+  else{cdEl.textContent='';btn.classList.remove('off');}
+}
+
+const TICK=4000;
+let idleCD=0, toiletTick=0;
+const IDLE={
+  happy:  ['Мур-р… всё хорошо 🧡','Смотрю на звёзды…','Нашёл тёплое место ✨'],
+  sad:    ['Мне немного одиноко…','Поиграй со мной 🥺','Погладь меня?'],
+  angry:  ['Я. ГОЛОДЕН. 😾','Где рыба?! Немедленно!','МЯУ! Голодный котик — опасный котик!'],
+  sick:   ['Мне плохо… 🤒','Дай таблетку…','У меня температура… 🌡️'],
+};
+
+setInterval(()=>{
+  G.ticks++;
+  if(G.sleeping){
+    G.energy=Math.min(100,G.energy+7); G.hunger=Math.max(0,G.hunger-1); G.happy=Math.max(0,G.happy-.4);
+    if(G.energy>=100){G.sleeping=false;document.getElementById('btnSleep').classList.remove('active-state');setMsg('Рыжик проснулся! Полон сил 🌅');}
+  } else {
+    G.hunger=Math.max(0,G.hunger-2.8); G.happy=Math.max(0,G.happy-1.4);
+    G.energy=Math.max(0,G.energy-.9); G.clean=Math.max(0,G.clean-.6);
+  }
+  if(!G.sleeping){
+    if(G.hunger<20||G.clean<20) G.health=Math.max(0,G.health-1.5);
+    else if(G.health<100&&!G.sick) G.health=Math.min(100,G.health+.3);
+  }
+  if(G.health<30&&!G.sick){G.sick=true;showToast('🤒 Рыжик заболел! Дай таблетку 💊');}
+  if(G.energy<=0&&!G.sleeping){G.sleeping=true;document.getElementById('btnSleep').classList.add('active-state');setMsg('Рыжик уснул сам — без сил 😴');}
+
+  toiletTick++;
+  if(toiletTick>=18&&!G.sleeping&&!G.locked){
+    toiletTick=0; G.clean=Math.max(0,G.clean-5);
+    tempAnim('toilet',3500,'Сходил в лоточек 🚽 Молодец!'); renderBars(); return;
+  }
+
+  for(const k in G.cd){if(G.cd[k]>0){G.cd[k]--;updateCD(k);}}
+
+  if(!G.locked){
+    const vs=computeState(); setCat(vs); setBadge(vs);
+    screen.classList.toggle('crit',G.hunger<20||G.health<25);
+    if(idleCD<=0&&Math.random()<.4){
+      const msgs=IDLE[G.sick?'sick':vs]||IDLE.happy;
+      setMsg(msgs[Math.floor(Math.random()*msgs.length)]);
+      idleCD=3;
+    } else idleCD=Math.max(0,idleCD-1);
+  }
+
+  if(G.ticks%30===0){G.age++;if(G.age%3===0){G.level++;showToast('🎉 Уровень '+G.level+'! Рыжик вырос!');}}
+  renderBars();
+},TICK);
+
+function doAction(key,fn){if(G.cd[key]>0)return;fn();updateCD(key);renderBars();}
+
+document.getElementById('btnFeed').addEventListener('click',e=>doAction('feed',()=>{
+  G.hunger=Math.min(100,G.hunger+32);G.happy=Math.min(100,G.happy+5);G.cd.feed=5;
+  setMsg('Рыжик с аппетитом ест рыбку! 🐟');
+  spawn(e.clientX,e.clientY,['🐟','✨','💛']);
+  tempAnim('eating',3200,'Объелся… хорошо-то как~');
+}));
+document.getElementById('btnPlay').addEventListener('click',e=>doAction('play',()=>{
+  if(G.sleeping)return;
+  G.happy=Math.min(100,G.happy+28);G.energy=Math.max(0,G.energy-20);G.hunger=Math.max(0,G.hunger-6);G.cd.play=7;
+  setMsg('Рыжик гоняется за клубком! 🧶');
+  spawn(e.clientX,e.clientY,['🧶','⚡','😸']);
+  tempAnim('playing',3000,'Устал, но счастлив ✨');
+}));
+document.getElementById('btnBath').addEventListener('click',e=>doAction('bath',()=>{
+  G.clean=Math.min(100,G.clean+50);G.happy=Math.max(0,G.happy-8);G.health=Math.min(100,G.health+8);G.cd.bath=8;
+  setMsg('МЯУ!!! Рыжик в воде!!! 🛁💦');
+  spawn(e.clientX,e.clientY,['💧','🫧','🛁']);
+  tempAnim('bathing',3500,'Мокрый, но чистый. Недоволен.');
+}));
+document.getElementById('btnSleep').addEventListener('click',e=>doAction('sleep',()=>{
+  G.sleeping=!G.sleeping;
+  const btn=document.getElementById('btnSleep');
+  if(G.sleeping){
+    setMsg('Рыжик свернулся клубочком 💤');
+    btn.classList.add('active-state');
+    spawn(e.clientX,e.clientY,['💤','🌙','⭐']);
+    if(!G.locked){setCat('sleeping');setBadge('sleeping');}
+  } else {
+    setMsg('Рыжик проснулся! 🌅');
+    btn.classList.remove('active-state');G.cd.sleep=3;
+  }
+}));
+document.getElementById('btnPet').addEventListener('click',e=>doAction('pet',()=>{
+  G.happy=Math.min(100,G.happy+14);G.cd.pet=2;
+  const lines=['Мур-р… мне нравится 🧡','Ещё, пожалуйста~','Пур-пур-пур… ✨','Мяу! Ты лучший 🐾'];
+  setMsg(lines[Math.floor(Math.random()*lines.length)]);
+  spawn(e.clientX,e.clientY,['🧡','❤️','🐾','✨']);
+}));
+document.getElementById('btnMeds').addEventListener('click',e=>doAction('meds',()=>{
+  if(!G.sick&&G.health>80){setMsg('Рыжик и так здоров! 😸');G.cd.meds=0;updateCD('meds');return;}
+  G.health=Math.min(100,G.health+40);G.sick=false;G.cd.meds=10;
+  setMsg('Рыжик выпил таблетку. Поправится 💊');
+  spawn(e.clientX,e.clientY,['💊','❤️','✨','💖']);
+  showToast('Рыжик выздоравливает! 💗');
+}));
+document.getElementById('catWrap').addEventListener('click',e=>{
+  if(G.cd.pet>0)return;
+  G.happy=Math.min(100,G.happy+8);G.cd.pet=2;updateCD('pet');
+  const lines=['Мяу! 🧡','Мурр~','Пур-пур ✨','Рад тебя видеть!'];
+  setMsg(lines[Math.floor(Math.random()*lines.length)]);
+  spawn(e.clientX,e.clientY,['🧡','💛','✨']);
+  renderBars();
+});
+
+function spawn(x,y,set){
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');el.className='floaty';
+    el.textContent=set[Math.floor(Math.random()*set.length)];
+    el.style.left=(x+(Math.random()-.5)*70)+'px';
+    el.style.top=(y+(Math.random()-.5)*30)+'px';
+    el.style.animationDelay=Math.random()*.25+'s';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),1400);
+  }
+}
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// Init
+catSvgEl.innerHTML=SVGS.happy;
+renderBars();setBadge('happy');
+for(const k in G.cd) updateCD(k);
+</script>
+</body>
+</html>
