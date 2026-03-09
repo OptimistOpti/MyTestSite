@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROXIMA SMP | Ванильный Minecraft-сервер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg:      #02100a;
+  --bg-card: rgba(5, 30, 14, 0.65);
+  --border:  rgba(34, 197, 94, 0.18);
+  --g1:      #052610;
+  --g2:      #0a3d1a;
+  --g3:      #14532d;
+  --g4:      #16a34a;
+  --g5:      #22c55e;
+  --g6:      #4ade80;
+  --g7:      #86efac;
+  --text:    #f0fdf4;
+  --text2:   #bbf7d0;
+  --text3:   #6ee7b7;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+#stars { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+.glow-layer {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 75% 50% at 50% 20%, rgba(22,163,74,0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 10% 65%, rgba(34,197,94,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 30% at 90% 10%, rgba(74,222,128,0.06) 0%, transparent 50%);
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  height:62px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 36px;
+  background:rgba(2,16,10,0.85);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.nav-logo-icon {
+  width:38px; height:38px; border:2px solid var(--g5); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  box-shadow:0 0 14px rgba(34,197,94,0.35);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%,100%{ box-shadow:0 0 14px rgba(34,197,94,0.35); }
+  50%    { box-shadow:0 0 28px rgba(34,197,94,0.65); }
+}
+.nav-logo-text { font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; color:var(--text); letter-spacing:1px; }
+.nav-logo-text em { color:var(--g5); font-style:normal; }
+.nav-links { display:flex; gap:28px; list-style:none; }
+.nav-links a { color:var(--text3); text-decoration:none; font-size:13px; font-weight:600; letter-spacing:.5px; transition:color .2s; }
+.nav-links a:hover { color:var(--g5); }
+.burger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:rgba(34,197,94,0.1); border:1px solid var(--border); border-radius:8px; padding:8px 10px; }
+.burger span { display:block; width:20px; height:2px; background:var(--g5); border-radius:2px; }
+.mob-menu { display:none; position:fixed; top:62px; left:0; right:0; z-index:499; background:rgba(2,16,10,0.97); border-bottom:1px solid var(--border); padding:20px 36px; flex-direction:column; gap:14px; }
+.mob-menu.open { display:flex; }
+.mob-menu a { color:var(--text3); text-decoration:none; font-size:15px; font-weight:600; padding:8px 0; border-bottom:1px solid var(--border); }
+
+/* ── HERO ── */
+.hero {
+  position:relative; z-index:1;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:110px 24px 90px; overflow:hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(34,197,94,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 90%);
+}
+
+.hero-title { display:flex; flex-direction:column; line-height:1; margin-bottom:30px; gap:4px; }
+.hero-title .line {
+  font-family:'Unbounded',sans-serif;
+  font-size:clamp(42px, 9vw, 98px);
+  font-weight:900; text-transform:uppercase; letter-spacing:1px;
+  opacity:0; transform:translateY(24px);
+  animation:slideUp .7s ease forwards;
+}
+.l1 { color:var(--text); animation-delay:.1s; }
+.l2 { color:var(--g5); text-shadow:0 0 42px rgba(34,197,94,0.55); animation-delay:.25s; }
+.l3 { color:var(--g7); animation-delay:.4s; }
+@keyframes slideUp { to { opacity:1; transform:none; } }
+
+.tw-box {
+  display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(10,61,26,0.45); border:1px solid rgba(34,197,94,0.28);
+  border-radius:40px; padding:14px 30px; margin-bottom:28px;
+  min-height:52px; min-width:320px;
+  font-size:clamp(14px, 2.5vw, 18px); color:var(--text3); font-weight:500;
+  opacity:0; animation:fadeIn .5s .7s ease forwards;
+}
+@keyframes fadeIn { to { opacity:1; } }
+#tw { color:var(--g6); font-weight:700; }
+.cur { display:inline-block; width:2px; height:1em; background:var(--g5); margin-left:1px; vertical-align:middle; animation:blink .65s step-end infinite; }
+@keyframes blink { 50%{ opacity:0; } }
+
+.badges { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:34px; opacity:0; animation:fadeIn .5s .9s ease forwards; }
+.badge {
+  padding:8px 18px; border:1px solid rgba(34,197,94,0.3); border-radius:50px;
+  font-size:11.5px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--text3); background:rgba(10,61,26,0.35);
+  transition:border-color .2s, color .2s, box-shadow .2s; cursor:default;
+}
+.badge:hover { border-color:var(--g5); color:var(--g5); box-shadow:0 0 10px rgba(34,197,94,0.2); }
+
+.cta-col { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:400px; opacity:0; animation:fadeIn .5s 1.05s ease forwards; }
+.btn {
+  width:100%; padding:16px 28px; border-radius:10px;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px;
+  letter-spacing:1px; text-transform:uppercase; cursor:pointer; border:none;
+  text-decoration:none; display:flex; align-items:center; justify-content:center; gap:9px;
+  transition:all .25s;
+}
+.btn-ip { background:rgba(5,38,16,0.75); border:1px solid rgba(34,197,94,0.28); color:var(--text3); }
+.btn-ip:hover { border-color:var(--g5); color:var(--g5); }
+.btn-apply { background:var(--g5); color:#011a08; font-weight:800; box-shadow:0 0 26px rgba(34,197,94,0.32); }
+.btn-apply:hover { background:var(--g6); box-shadow:0 0 44px rgba(74,222,128,0.5); transform:translateY(-2px); }
+.btn-buy { background:transparent; border:1px solid rgba(34,197,94,0.3); color:var(--text2); }
+.btn-buy:hover { background:rgba(34,197,94,0.08); border-color:var(--g5); }
+
+.online { margin-top:34px; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text3); opacity:0; animation:fadeIn .5s 1.2s ease forwards; }
+.odot { width:9px; height:9px; background:var(--g5); border-radius:50%; box-shadow:0 0 8px var(--g5); animation:logoPulse 2s ease-in-out infinite; }
+#cnt { font-size:22px; font-weight:900; color:var(--g5); font-family:'Unbounded',sans-serif; }
+
+.char1 { position:absolute; bottom:0; left:4%; width:clamp(90px,13vw,160px); z-index:2; pointer-events:none; animation:flt 4s ease-in-out infinite; }
+@keyframes flt { 0%,100%{ transform:translateY(0) rotate(-1deg); } 50%{ transform:translateY(-14px) rotate(1deg); } }
+
+/* ── SECTIONS ── */
+.sec { position:relative; z-index:1; padding:90px 24px; max-width:1060px; margin:0 auto; }
+.sec-tag { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--g5); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+.sec-tag::before { content:''; display:block; width:28px; height:1px; background:var(--g5); }
+.sec-h2 { font-family:'Unbounded',sans-serif; font-size:clamp(26px,5vw,50px); font-weight:900; line-height:1.15; margin-bottom:20px; }
+.sec-h2 em { color:var(--g5); font-style:normal; }
+.sec-p { font-size:15px; line-height:1.8; color:var(--text3); max-width:600px; }
+
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+
+/* slider */
+.sl-wrap { position:relative; border-radius:16px; overflow:hidden; border:1px solid var(--border); background:var(--g1); aspect-ratio:16/9; }
+.sl-track { display:flex; transition:transform .5s cubic-bezier(.4,0,.2,1); }
+.sl-item { min-width:100%; aspect-ratio:16/9; background:var(--g2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; font-size:13px; color:var(--text3); }
+.sl-item span { font-size:38px; }
+.sl-item b { font-size:15px; font-weight:700; color:var(--text2); }
+.sl-btn { position:absolute; top:50%; transform:translateY(-50%); background:rgba(2,16,10,0.7); border:1px solid var(--border); color:var(--g5); width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s, border-color .2s; z-index:5; }
+.sl-btn:hover { background:rgba(34,197,94,0.15); border-color:var(--g5); }
+.sl-btn.p { left:10px; }
+.sl-btn.n { right:10px; }
+.sl-cap { position:absolute; bottom:0; left:0; right:0; background:rgba(2,16,10,0.75); padding:8px 14px; font-size:12px; color:var(--text3); display:flex; align-items:center; gap:6px; }
+
+/* features */
+.feat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:18px; }
+.feat { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:26px 22px; transition:border-color .25s, transform .25s, box-shadow .25s; }
+.feat:hover { border-color:rgba(34,197,94,0.45); transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.45), 0 0 18px rgba(34,197,94,0.07); }
+.feat-ic { font-size:30px; margin-bottom:12px; }
+.feat-t { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; color:var(--text2); margin-bottom:8px; line-height:1.4; }
+.feat-d { font-size:13px; color:var(--text3); line-height:1.7; }
+
+/* divider */
+.div { width:100%; max-width:900px; margin:0 auto; height:1px; background:linear-gradient(90deg,transparent,rgba(34,197,94,0.25),transparent); }
+
+/* lore */
+.lore { position:relative; z-index:1; padding:60px 24px; }
+.lore-in { max-width:700px; margin:0 auto; text-align:center; padding:40px; border:1px solid rgba(34,197,94,0.2); border-radius:18px; background:rgba(5,38,16,0.3); position:relative; overflow:hidden; }
+.lore-in::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(34,197,94,0.06) 0%, transparent 70%); }
+.lore-lbl { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--g5); margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:8px; }
+.lore-lbl::before,.lore-lbl::after { content:'✦'; font-size:10px; }
+.lore-q { font-size:clamp(14px,2vw,16px); line-height:1.9; color:var(--text3); font-style:italic; position:relative; z-index:1; }
+.lore-q strong { color:var(--g6); font-style:normal; font-weight:600; }
+
+/* cta-section */
+.cta-sec { position:relative; z-index:1; padding:90px 24px; text-align:center; }
+.cta-sec-in { max-width:680px; margin:0 auto; }
+.cta-sec .sec-p { max-width:100%; text-align:center; margin:0 auto; }
+.btn-start {
+  background:var(--g5); color:#011a08;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:14px; letter-spacing:1px;
+  padding:18px 44px; border-radius:10px; border:none; cursor:pointer;
+  text-decoration:none; display:inline-flex; align-items:center; gap:10px;
+  box-shadow:0 0 28px rgba(34,197,94,0.35); transition:all .25s;
+  margin-top:32px;
+}
+.btn-start:hover { background:var(--g6); box-shadow:0 0 48px rgba(74,222,128,0.5); transform:translateY(-2px); }
+.char2 { width:clamp(80px,12vw,140px); position:absolute; right:8%; bottom:0; pointer-events:none; animation:flt 5s ease-in-out infinite reverse; }
+
+/* footer */
+footer { position:relative; z-index:1; border-top:1px solid rgba(34,197,94,0.1); padding:50px 36px 30px; }
+.ft-grid { max-width:1000px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; margin-bottom:36px; }
+.ft-logo { display:flex; align-items:center; gap:10px; margin-bottom:12px; text-decoration:none; }
+.ft-logo-ic { width:34px; height:34px; border:2px solid var(--g5); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.ft-logo-t { font-family:'Unbounded',sans-serif; font-size:16px; font-weight:700; color:var(--text); }
+.ft-logo-t em { color:var(--g5); font-style:normal; }
+.ft-desc { font-size:13px; line-height:1.7; color:#3d8a57; max-width:280px; }
+.ft-col-t { font-family:'Unbounded',sans-serif; font-size:12px; font-weight:700; color:var(--text2); letter-spacing:1px; margin-bottom:14px; }
+.ft-links { list-style:none; display:flex; flex-direction:column; gap:9px; }
+.ft-links a { color:#3d8a57; text-decoration:none; font-size:13px; transition:color .2s; display:flex; align-items:center; gap:7px; }
+.ft-links a:hover { color:var(--g5); }
+.ft-bot { max-width:1000px; margin:0 auto; border-top:1px solid rgba(34,197,94,0.08); padding-top:20px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#2a5c3a; gap:12px; flex-wrap:wrap; }
+.ft-bot em { color:var(--g5); font-style:normal; }
+
+.btop { position:fixed; bottom:24px; right:24px; z-index:300; width:42px; height:42px; background:rgba(5,38,16,0.85); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--g5); font-size:18px; text-decoration:none; backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity .3s, border-color .2s; }
+.btop.show { opacity:1; pointer-events:auto; }
+.btop:hover { border-color:var(--g5); box-shadow:0 0 14px rgba(34,197,94,0.3); }
+
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .65s ease, transform .65s ease; }
+.reveal.vis { opacity:1; transform:none; }
+
+@media(max-width:720px){
+  nav { padding:0 16px; }
+  .nav-links { display:none; }
+  .burger { display:flex; }
+  .hero { padding:100px 16px 100px; }
+  .tw-box { min-width:unset; width:100%; }
+  .sec { padding:60px 16px; }
+  .about-grid { grid-template-columns:1fr; gap:36px; }
+  .ft-grid { grid-template-columns:1fr; }
+  .ft-bot { flex-direction:column; text-align:center; }
+  .lore-in { padding:28px 20px; }
+  .char1, .char2 { width:80px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="glow-layer"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🌿</div>
+    <div class="nav-logo-text"><em>PROXIMA</em>&nbsp;SMP</div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Главная</a></li>
+    <li><a href="#about">Вики</a></li>
+    <li><a href="#features">Команда</a></li>
+    <li><a href="#" target="_blank">Магазин ↗</a></li>
+  </ul>
+  <div class="burger" onclick="document.getElementById('mm').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mob-menu" id="mm">
+  <a href="#">Главная</a>
+  <a href="#about">Вики</a>
+  <a href="#features">Команда</a>
+  <a href="#">Магазин ↗</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-title">
+    <div class="line l1">Динамичность</div>
+    <div class="line l2">Сплочённость</div>
+    <div class="line l3">Веселье!</div>
+  </div>
+
+  <div class="tw-box"><span id="tw"></span><span class="cur"></span></div>
+
+  <div class="badges">
+    <span class="badge">Minecraft 1.21.11</span>
+    <span class="badge">Vanilla</span>
+    <span class="badge">Whitelist</span>
+    <span class="badge">RU Сообщество</span>
+    <span class="badge">Живой лор</span>
+  </div>
+
+  <div class="cta-col">
+    <button class="btn btn-ip" onclick="copyIP(this)">📋 IP: play.proxima-smp.ru</button>
+    <a href="https://discord.gg/" class="btn btn-apply">🌊 Подать заявку</a>
+    <a href="#" class="btn btn-buy">🛒 Купить проходку</a>
+  </div>
+
+  <div class="online">
+    <div class="odot"></div>
+    <span id="cnt">0</span>
+    <span>игроков онлайн</span>
+  </div>
+
+  <!-- Minecraft character -->
+  <div class="char1">
+    <svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="0" width="40" height="4" fill="#2d5a20"/>
+      <rect x="20" y="3" width="40" height="34" fill="#a07850"/>
+      <rect x="27" y="12" width="10" height="10" fill="#fff"/>
+      <rect x="43" y="12" width="10" height="10" fill="#fff"/>
+      <rect x="29" y="14" width="5" height="5" fill="#22c55e"/>
+      <rect x="45" y="14" width="5" height="5" fill="#22c55e"/>
+      <rect x="30" y="15" width="3" height="3" fill="#000"/>
+      <rect x="46" y="15" width="3" height="3" fill="#000"/>
+      <rect x="28" y="26" width="24" height="4" fill="#7c4d2c"/>
+      <rect x="31" y="24" width="4" height="2" fill="#c88a62"/>
+      <rect x="45" y="24" width="4" height="2" fill="#c88a62"/>
+      <rect x="32" y="37" width="16" height="7" fill="#8a6845"/>
+      <rect x="18" y="44" width="44" height="34" fill="#16a34a"/>
+      <rect x="18" y="64" width="44" height="8" fill="#0f7a34"/>
+      <rect x="36" y="63" width="8" height="9" fill="#22c55e"/>
+      <rect x="2" y="44" width="14" height="30" fill="#16a34a"/>
+      <rect x="64" y="44" width="14" height="30" fill="#16a34a"/>
+      <rect x="2" y="74" width="14" height="8" fill="#a07850"/>
+      <rect x="64" y="74" width="14" height="8" fill="#a07850"/>
+      <rect x="20" y="78" width="17" height="42" fill="#15803d"/>
+      <rect x="43" y="78" width="17" height="42" fill="#15803d"/>
+      <rect x="18" y="106" width="21" height="14" fill="#0a4923"/>
+      <rect x="41" y="106" width="21" height="14" fill="#0a4923"/>
+    </svg>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- ABOUT -->
+<div id="about" class="sec">
+  <div class="about-grid reveal">
+    <div>
+      <div class="sec-tag">О сервере</div>
+      <h2 class="sec-h2">Коротко о <em>Proxima SMP</em></h2>
+      <p class="sec-p">Proxima SMP — это ванильный Minecraft-сервер, созданный для честного и атмосферного выживания без доната, приватов и лишних плагинов.</p>
+      <p class="sec-p" style="margin-top:14px">Тут всё строится на доверии, общении и совместной игре. Каждый игрок может внести свой вклад в развитие мира и историю сервера.</p>
+      <p class="sec-p" style="margin-top:14px">Мы ценим спокойствие, порядок и уют — без токсичности и хаоса.</p>
+    </div>
+    <div>
+      <div class="sl-wrap">
+        <div class="sl-track" id="slT">
+          <div class="sl-item"><span>⚖️</span><b>Первый суд</b></div>
+          <div class="sl-item"><span>🏰</span><b>Постройки игроков</b></div>
+          <div class="sl-item"><span>🎆</span><b>Завершение 2-го сезона</b></div>
+          <div class="sl-item"><span>💀</span><b>Коллекция голов</b></div>
+          <div class="sl-item"><span>⛏️</span><b>Добыча ресурсов</b></div>
+        </div>
+        <button class="sl-btn p" onclick="sl(-1)">‹</button>
+        <button class="sl-btn n" onclick="sl(1)">›</button>
+        <div class="sl-cap">🖼️ <span id="slCap">Первый суд</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- FEATURES -->
+<div id="features" class="sec">
+  <div class="sec-tag reveal">Преимущества</div>
+  <h2 class="sec-h2 reveal" style="margin-bottom:36px">Что делает нас <em>особенными</em></h2>
+  <div class="feat-grid reveal">
+    <div class="feat"><div class="feat-ic">👑</div><div class="feat-t">Наилучшая администрация</div><div class="feat-d">Доброжелательные администраторы помогут Вам в любой ситуации!</div></div>
+    <div class="feat"><div class="feat-ic">🎉</div><div class="feat-t">Общение и развлекаловка!</div><div class="feat-d">Уютная атмосфера, множество мероприятий и хорошее комьюнити!</div></div>
+    <div class="feat"><div class="feat-ic">🔄</div><div class="feat-t">Регулярные обновления</div><div class="feat-d">Следи за изменениями и новостями в соцсетях!</div></div>
+    <div class="feat"><div class="feat-ic">⚡</div><div class="feat-t">Оптимизированный сервер</div><div class="feat-d">Плавная игра и стабильный TPS!</div></div>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- LORE -->
+<div class="lore">
+  <div class="lore-in reveal">
+    <div class="lore-lbl">Из Первой Книги PROXIMA SMP</div>
+    <div class="lore-q">«В начале не было ничего, кроме океана и тьмы. Потом пришли Первые — те, кто осмелился назвать берег домом. Они не знали, что строят нечто большее, чем город. <strong>Они строили легенду.</strong>»</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-sec">
+  <div class="cta-sec-in reveal">
+    <div class="sec-tag" style="justify-content:center;margin-bottom:14px">Присоединяйся</div>
+    <h2 class="sec-h2">Мы ждём тебя <em>у нас!</em></h2>
+    <p class="sec-p">Попасть к нам на сервер очень легко!<br>Нужно лишь подать заявку на бесплатную проходку или купить мгновенный доступ у нас на сайте!</p>
+    <a href="https://discord.gg/" class="btn-start">▶ Начать играть!</a>
+  </div>
+  <div class="char2">
+    <svg viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="2" width="32" height="28" fill="#a07850"/>
+      <rect x="20" y="9" width="8" height="8" fill="#fff"/><rect x="32" y="9" width="8" height="8" fill="#fff"/>
+      <rect x="22" y="11" width="4" height="4" fill="#4ade80"/><rect x="34" y="11" width="4" height="4" fill="#4ade80"/>
+      <rect x="22" y="22" width="16" height="4" fill="#7c4d2c"/>
+      <rect x="14" y="32" width="32" height="26" fill="#15803d"/>
+      <rect x="0" y="32" width="12" height="22" fill="#15803d"/><rect x="48" y="32" width="12" height="22" fill="#15803d"/>
+      <rect x="14" y="58" width="13" height="32" fill="#166534"/><rect x="33" y="58" width="13" height="32" fill="#166534"/>
+    </svg>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-grid">
+    <div>
+      <a href="#" class="ft-logo">
+        <div class="ft-logo-ic">🌿</div>
+        <div class="ft-logo-t"><em>PROXIMA</em>&nbsp;SMP</div>
+      </a>
+      <p class="ft-desc">Ванильный Minecraft-сервер 1.21.11 с живым лором. Только по whitelist.</p>
+    </div>
+    <div>
+      <div class="ft-col-t">Навигация</div>
+      <ul class="ft-links">
+        <li><a href="#">Главная</a></li>
+        <li><a href="#">Вики</a></li>
+        <li><a href="#">Команда</a></li>
+        <li><a href="#">Магазин</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="ft-col-t">Сообщество</div>
+      <ul class="ft-links">
+        <li><a href="#">✈️ Telegram</a></li>
+        <li><a href="#">▶️ YouTube</a></li>
+        <li><a href="#">💬 Discord</a></li>
+        <li><a href="#">📚 Вики</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <span>© 2025–2026 <em>PROXIMA SMP</em> · Все права защищены. Сервер не относится к Mojang Studios.</span>
+    <span>〜〜〜 play.proxima-smp.ru 〜〜〜</span>
+  </div>
+</footer>
+
+<a href="#" class="btop" id="btop">↑</a>
+
+<script>
+/* STARS */
+const cv = document.getElementById('stars');
+const cx = cv.getContext('2d');
+let sts = [];
+function rsz(){ cv.width=innerWidth; cv.height=innerHeight; }
+function ist(){ sts=[]; for(let i=0;i<200;i++) sts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.3+.2,a:Math.random(),da:(Math.random()*.005+.001)*(Math.random()<.5?1:-1),sp:Math.random()*.1+.02}); }
+function drs(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  sts.forEach(s=>{ s.a+=s.da; if(s.a>1||s.a<0)s.da*=-1; s.y-=s.sp; if(s.y<0)s.y=cv.height; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,Math.PI*2); cx.fillStyle=`rgba(134,239,172,${s.a*.7})`; cx.fill(); });
+  requestAnimationFrame(drs);
+}
+rsz(); ist(); drs(); addEventListener('resize',()=>{rsz();ist();});
+
+/* TYPEWRITER */
+const phrases=['Proxima SMP — Ванильный майнкрафт сервер','Добро пожаловать в наш мир!','Создавай историю вместе с нами','Подай заявку и стань частью Proxima SMP'];
+let pi=0,ci=0,del=false;
+const tw=document.getElementById('tw');
+function tl(){
+  const p=phrases[pi];
+  if(!del){ tw.textContent=p.slice(0,++ci); if(ci===p.length){del=true;setTimeout(tl,2000);return;} }
+  else{ tw.textContent=p.slice(0,--ci); if(ci===0){del=false;pi=(pi+1)%phrases.length;} }
+  setTimeout(tl,del?35:60);
+}
+tl();
+
+/* COUNTER */
+const tgt=Math.floor(Math.random()*14)+5; let cur=0;
+const ce=document.getElementById('cnt');
+const ti=setInterval(()=>{ ce.textContent=++cur; if(cur>=tgt)clearInterval(ti); },60);
+
+/* COPY IP */
+function copyIP(btn){ navigator.clipboard.writeText('play.proxima-smp.ru').catch(()=>{}); const o=btn.innerHTML; btn.innerHTML='✅ Скопировано!'; setTimeout(()=>btn.innerHTML=o,2000); }
+
+/* SLIDER */
+const caps=['Первый суд','Постройки игроков','Завершение 2-го сезона','Коллекция голов','Добыча ресурсов'];
+let sc=0;
+function sl(d){ sc=(sc+d+caps.length)%caps.length; document.getElementById('slT').style.transform=`translateX(-${sc*100}%)`; document.getElementById('slCap').textContent=caps[sc]; }
+setInterval(()=>sl(1),4000);
+
+/* SCROLL REVEAL */
+const ob=new IntersectionObserver(en=>en.forEach(e=>{ if(e.isIntersecting)e.target.classList.add('vis'); }),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(e=>ob.observe(e));
+
+/* BACK TO TOP */
+const bt=document.getElementById('btop');
+addEventListener('scroll',()=>bt.classList.toggle('show',scrollY>400));
+</script>
+</body>
+</html>
